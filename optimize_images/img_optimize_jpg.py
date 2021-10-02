@@ -1,5 +1,6 @@
 # encoding: utf-8
 import os
+import logging
 from io import BytesIO
 
 import piexif
@@ -10,6 +11,7 @@ from .img_aux_processing import downsize_img, save_compressed
 from .img_aux_processing import make_grayscale
 from .img_dynamic_quality import jpeg_dynamic_quality
 
+error_logger = logging.getLogger('error_log')
 
 def optimize_jpg(task: Task) -> TaskResult:
     """ Try to reduce file size of a JPG image.
@@ -35,11 +37,14 @@ def optimize_jpg(task: Task) -> TaskResult:
     try:
         had_exif = True if piexif.load(task.src_path)['Exif'] else False
     except piexif.InvalidImageDataError:  # Not a supported format
+        error_logger.error(f"{task.src_path} is not in a supported format")
         had_exif = False
     except ValueError:  # No exif info
+        error_logger.info(f"{task.src_path} had not exif data")
         had_exif = False
     # TODO: Check if we can provide a more specific treatment of piexif exceptions.
     except Exception:
+        logging.error(f"Unable to load {task.src_path}")
         had_exif = False
 
     if task.max_w or task.max_h:
@@ -80,10 +85,12 @@ def optimize_jpg(task: Task) -> TaskResult:
             piexif.transplant(os.path.expanduser(task.src_path), tmp_buffer)
             has_exif = True
         except ValueError:
+            error_logger.error(f"Unable to write exif data after optimization to {task.src_path}")
             has_exif = False
         # TODO: Check if we can provide a more specific treatment
         #       of piexif exceptions.
         except Exception:
+            error_logger.error(f"Unable to write to {task.src_path}")
             had_exif = False
     else:
         has_exif = False

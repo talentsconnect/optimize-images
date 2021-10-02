@@ -1,6 +1,7 @@
 # encoding: utf-8
 
 import os
+import logging
 
 import piexif
 from PIL import Image
@@ -9,6 +10,7 @@ from optimize_images.data_structures import Task, TaskResult
 from optimize_images.img_optimize_jpg import optimize_jpg
 from optimize_images.img_optimize_png import optimize_png
 
+error_logger = logging.getLogger('root')
 
 def do_optimization(task: Task) -> TaskResult:
     """ Try to reduce file size of an image.
@@ -34,6 +36,7 @@ def do_optimization(task: Task) -> TaskResult:
             return optimize_jpg(task)
 
     except OSError:
+        error_logger.error(f"Unable to open {task.src_path}")
         return TaskResult(img=task.src_path,
                           orig_format='',
                           result_format='',
@@ -57,8 +60,10 @@ def do_optimization(task: Task) -> TaskResult:
     try:
         had_exif = True if piexif.load(task.src_path)['Exif'] else False
     except piexif.InvalidImageDataError:  # Not a supported format
+        error_logger.error(f"{task.src_path} is not in a supported format")
         had_exif = False
     except ValueError:  # No exif info
+        error_logger.info(f"{task.src_path} has no exif data")
         had_exif = False
 
     return TaskResult(img=task.src_path,

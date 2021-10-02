@@ -50,6 +50,7 @@ except ImportError:
     sys.exit()
 
 from timeit import default_timer as timer
+import logging
 
 from optimize_images.file_utils import search_images
 from optimize_images.data_structures import OutputConfiguration, Task
@@ -66,11 +67,30 @@ def count_gen(gen):
     l = list(gen)
     return len(l), l
 
+def setup_error_logger(error_log_file):
+    logging.basicConfig(
+        format="%(levelname)s//%(message)s",
+        filename=error_log_file,
+        level=logging.INFO
+    )
+
+def setup_error_logger2(error_log_file):
+    formatter = logging.Formatter(fmt='%(asctime)s %(levelname)s %(module)s %(message)s')
+
+    file_handler = logging.FileHandler(error_log_file)
+    file_handler.setFormatter(formatter)
+
+    logger = logging.getLogger('error_log')
+    logger.setLevel(logging.DEBUG)
+    logger.handlers = [file_handler]
+    return logger
+
 def optimize_batch(src_path, watch_dir, recursive, quality, remove_transparency,
                    reduce_colors, max_colors, max_w, max_h, keep_exif, convert_all,
                    conv_big, force_del, bg_color, grayscale, ignore_size_comparison, 
-                   fast_mode, jobs, output_config):
+                   fast_mode, jobs, output_config, log_errors):
     appstart = timer()
+
     line_width, our_pool_executor, workers = adjust_for_platform()
 
     if jobs != 0:
@@ -177,6 +197,8 @@ def optimize_batch(src_path, watch_dir, recursive, quality, remove_transparency,
 def main():
     args = get_args()
     try:
+        setup_error_logger(args[19])
+        
         optimize_batch(*args)
     except (OIImagesNotFoundError, OIInvalidPathError, OIKeyboardInterrupt) as ex:
         print(ex.message)
