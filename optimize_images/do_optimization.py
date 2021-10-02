@@ -8,6 +8,7 @@ from PIL import Image
 from optimize_images.data_structures import Task, TaskResult
 from optimize_images.img_optimize_jpg import optimize_jpg
 from optimize_images.img_optimize_png import optimize_png
+from optimize_images.img_optimize_webp import optimize_webp
 
 
 def do_optimization(task: Task) -> TaskResult:
@@ -23,6 +24,9 @@ def do_optimization(task: Task) -> TaskResult:
     """
     # TODO: Catch exceptions that may occur here.
     try:
+        if task.target_format == 'WEBP':
+            return optimize_webp(task)
+        
         img: Image.Image
         with Image.open(task.src_path) as img:
             img_format: str = img.format.upper()

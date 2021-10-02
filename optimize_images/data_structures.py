@@ -28,6 +28,7 @@ class Task(NamedTuple):
     no_size_comparison: bool
     fast_mode: bool
     output_config: OutputConfiguration
+    target_format: str
 
 
 class TaskResult(NamedTuple):

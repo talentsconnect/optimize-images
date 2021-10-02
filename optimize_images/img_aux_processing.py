@@ -211,8 +211,11 @@ def save_compressed(src_path: str,
 
     if not compare_sizes or (final_size / orig_size < .99):
         tmp_buffer.seek(0)
-        with open(target_path, 'wb') as file:
-            file.write(tmp_buffer.getbuffer())
+        try:
+            with open(target_path, 'wb') as file:
+                file.write(tmp_buffer.getbuffer())
+        except EnvironmentError as enve:
+            show_img_exception(enve, src_path)
 
         was_optimized = True
         if force_delete:

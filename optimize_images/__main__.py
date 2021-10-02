@@ -69,7 +69,7 @@ def count_gen(gen):
 def optimize_batch(src_path, watch_dir, recursive, quality, remove_transparency,
                    reduce_colors, max_colors, max_w, max_h, keep_exif, convert_all,
                    conv_big, force_del, bg_color, grayscale, ignore_size_comparison, 
-                   fast_mode, jobs, output_config):
+                   fast_mode, jobs, output_config, webp):
     appstart = timer()
     line_width, our_pool_executor, workers = adjust_for_platform()
 
@@ -82,6 +82,10 @@ def optimize_batch(src_path, watch_dir, recursive, quality, remove_transparency,
     total_src_size = 0
     total_bytes_saved = 0
 
+    target_format = ""
+    if webp:
+        target_format = "WEBP"
+
     if watch_dir:
         if not os.path.isdir(os.path.abspath(src_path)):
             msg = "\nPlease specify a valid path to an existing folder."
@@ -90,7 +94,7 @@ def optimize_batch(src_path, watch_dir, recursive, quality, remove_transparency,
         watch_task = Task(src_path, quality, remove_transparency, reduce_colors,
                           max_colors, max_w, max_h, keep_exif, convert_all,
                           conv_big, force_del, bg_color, grayscale,
-                          ignore_size_comparison, fast_mode, output_config)
+                          ignore_size_comparison, fast_mode, output_config, target_format)
 
         watch_for_new_files(watch_task)
         return
@@ -108,7 +112,7 @@ def optimize_batch(src_path, watch_dir, recursive, quality, remove_transparency,
         tasks = (Task(img_path, quality, remove_transparency, reduce_colors,
                       max_colors, max_w, max_h, keep_exif, convert_all, conv_big,
                       force_del, bg_color, grayscale, ignore_size_comparison, fast_mode,
-                      output_config)
+                      output_config, target_format)
                  for img_path in search_images(src_path, recursive=recursive))
 
         num_images, tasks = count_gen(tasks)
@@ -149,7 +153,7 @@ def optimize_batch(src_path, watch_dir, recursive, quality, remove_transparency,
         img_task = Task(src_path, quality, remove_transparency, reduce_colors,
                         max_colors, max_w, max_h, keep_exif, convert_all, conv_big,
                         force_del, bg_color, grayscale, ignore_size_comparison, fast_mode, 
-                        output_config)
+                        output_config, target_format)
 
         result = do_optimization(img_task)
         total_src_size = result.orig_size

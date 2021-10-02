@@ -198,6 +198,13 @@ def get_args():
     png_group.add_argument(
         '-ca', "--convert-all", action='store_true', help=ca_help)
 
+    webp_msg = 'The following options apply only to optimization for WEBP.'
+    webp_group = parser.add_argument_group(
+        'WEBP specific options'.upper(), description=webp_msg)
+
+    webp_help = "Transform the input file(s) to .WEBP file(s)"
+    webp_group.add_argument('-w', '--webp', help=webp_help, action='store_true')
+
     fd_help = "Delete the original file when converting to JPG."
     png_group.add_argument(
         '-fd', "--force-delete", action='store_true', help=fd_help)
@@ -263,4 +270,4 @@ def get_args():
            args.reduce_colors, args.max_colors, args.max_width, args.max_height, \
            args.keep_exif, args.convert_all, args.convert_big, args.force_delete, \
            bg_color, args.grayscale, args.no_comparison, args.fast_mode, \
-           args.jobs, output_config
+           args.jobs, output_config, args.webp
